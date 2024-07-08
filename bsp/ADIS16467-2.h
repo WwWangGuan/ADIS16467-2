@@ -74,38 +74,77 @@
 #define FLSHCNT_LOW_REG 0x7C
 #define FLSHCNT_HIGH_REG 0x7E
 
-typedef struct
-{
+typedef struct {
+    /* RAW register data */
+    int32_t Gyro_X_RAW;
+    int32_t Gyro_Y_RAW;
+    int32_t Gyro_Z_RAW;
+    /* 16 bit data */
+    float Gyro__X;
+    float Gyro__y;
+    float Gyro__Z;
+    /*32 bit data, additional */
+    float HP_Gyro_X;
+    float HP_Gyro_Y;
+    float HP_Gyro_Z;
+} Gyro_T;
+typedef struct {
+    /* RAW register data */
+    int32_t Accel_X_RAW;
+    int32_t Accel_Y_RAW;
+    int32_t Accel_Z_RAW;
+    /* 16 bit data */
+    float Accel_X;
+    float Accel_y;
+    float Accel_Z;
+    /*32 bit data, additional */
+    float HP_Accel_X;
+    float HP_Accel_Y;
+    float HP_Accel_Z;
+} Accel_T;
+typedef struct {
     SPI_HandleTypeDef *hspi; //SPI handle
     GPIO_TypeDef *GPIOx;     //CS pin GPIOx
     uint16_t GPIO_PIN;       //CS pin.
+
+    uint8_t K_G; //scale factor,ADSI16467-2 default 40
+    float KG_reciprocal; //the reciprocal of scale factor,to accelerate calculate
 
     uint16_t status;
     uint16_t rangeModel; //Measurement range (model specific) identifier.
     uint16_t prodId; //Identification, device number,default 0x4053.
 
     uint16_t firm_rev; //Identification, firmware revision
-    uint16_t firm_dm;  //Identification, date code, day and month`
-    uint16_t firm_y;  //Identification, date code, year
-    uint16_t serial_num; //Identification, serial number
+    uint16_t firm_month; //Factory configuration month
+    uint16_t firm_day; //Factory configuration day
+    uint16_t firm_year; //Identification, date code, year
+    uint16_t serial_num; //Factory configuration year
 
+    Accel_T ADIS_Accel;
 
-    int32_t Accel_X_RAW;
-    int32_t Accel_Y_RAW;
-    int32_t Accel_Z_RAW;
+    Gyro_T ADIS_Gyro;
 
-    float Ax;
-    float Ay;
-    float Az;
+    float Temperature;
+} ADIS16467_T;
 
-    int32_t Gyro_X_RAW;
-    int32_t Gyro_Y_RAW;
-    int32_t Gyro_Z_RAW;
-    float Gx;
-    float Gy;
-    float Gz;
+void ADIS16467_Init(ADIS16467_T *device);
 
-    float Temperature; 
-} ADIS16467_t;
+int ADIS16467_Check(ADIS16467_T *device);
+
+void ADIS16467_DeviceInfo(ADIS16467_T *device);
+
+void ADIS16467_Read_Accel(ADIS16467_T *device);
+
+void ADIS16467_Read_Gyro(ADIS16467_T *device);
+
+void ADIS16467_Read_Temp(ADIS16467_T *device);
+
+int8_t ADI_Read_Reg(ADIS16467_T *device, uint8_t addr, uint16_t *receive, uint8_t num);
+
+int8_t ADI_Write_Reg(ADIS16467_T *device, uint8_t addr, uint8_t value);
+
+uint16_t ADI_flame_TandR(ADIS16467_T *device, uint16_t trans);
+
+void sb_delay(volatile uint32_t t);
 
 #endif //ADIS16467_ADIS16467_2_H
