@@ -2,6 +2,7 @@
 #ifndef ADIS16467_ADIS16467_2_H
 #define ADIS16467_ADIS16467_2_H
 
+#include "main.h"
 
 #define DIAG_STAT_REG 0x02
 
@@ -73,5 +74,38 @@
 #define FLSHCNT_LOW_REG 0x7C
 #define FLSHCNT_HIGH_REG 0x7E
 
+typedef struct
+{
+    SPI_HandleTypeDef *hspi; //SPI handle
+    GPIO_TypeDef *GPIOx;     //CS pin GPIOx
+    uint16_t GPIO_PIN;       //CS pin.
+
+    uint16_t status;
+    uint16_t rangeModel; //Measurement range (model specific) identifier.
+    uint16_t prodId; //Identification, device number,default 0x4053.
+
+    uint16_t firm_rev; //Identification, firmware revision
+    uint16_t firm_dm;  //Identification, date code, day and month`
+    uint16_t firm_y;  //Identification, date code, year
+    uint16_t serial_num; //Identification, serial number
+
+
+    int32_t Accel_X_RAW;
+    int32_t Accel_Y_RAW;
+    int32_t Accel_Z_RAW;
+
+    float Ax;
+    float Ay;
+    float Az;
+
+    int32_t Gyro_X_RAW;
+    int32_t Gyro_Y_RAW;
+    int32_t Gyro_Z_RAW;
+    float Gx;
+    float Gy;
+    float Gz;
+
+    float Temperature; 
+} ADIS16467_t;
 
 #endif //ADIS16467_ADIS16467_2_H
