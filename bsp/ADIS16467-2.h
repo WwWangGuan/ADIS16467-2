@@ -80,9 +80,9 @@ typedef struct {
     int32_t Gyro_Y_RAW;
     int32_t Gyro_Z_RAW;
     /* 16 bit data */
-    float Gyro__X;
-    float Gyro__y;
-    float Gyro__Z;
+    float Gyro_X;
+    float Gyro_Y;
+    float Gyro_Z;
     /*32 bit data, additional */
     float HP_Gyro_X;
     float HP_Gyro_Y;
@@ -103,26 +103,58 @@ typedef struct {
     float HP_Accel_Z;
 } Accel_T;
 typedef struct {
+    /* RAW register data */
+    int32_t DeltaAngle_X_RAW;
+    int32_t DeltaAngleAccel_Y_RAW;
+    int32_t DeltaAngle_Z_RAW;
+    /* 16 bit data */
+    float DeltaAngle_X;
+    float DeltaAngle_y;
+    float DeltaAngle_Z;
+    /*32 bit data, additional */
+    float HP_DeltaAngle_X;
+    float HP_DeltaAngle_Y;
+    float HP_DeltaAngle_Z;
+}DeltaAngle_T;
+typedef struct {
+    /* RAW register data */
+    int32_t DeltaVelocity_X_RAW;
+    int32_t DeltaAngleAccel_Y_RAW;
+    int32_t DeltaVelocity_Z_RAW;
+    /* 16 bit data */
+    float DeltaVelocity_X;
+    float DeltaVelocity_y;
+    float DeltaVelocity_Z;
+    /*32 bit data, additional */
+    float HP_DeltaVelocity_X;
+    float HP_DeltaVelocity_Y;
+    float HP_DeltaVelocity_Z;
+}DeltaVelocity_T;
+typedef struct {
     SPI_HandleTypeDef *hspi; //SPI handle
     GPIO_TypeDef *GPIOx;     //CS pin GPIOx
     uint16_t GPIO_PIN;       //CS pin.
 
-    uint8_t K_G; //scale factor,ADSI16467-2 default 40
-    float KG_reciprocal; //the reciprocal of scale factor,to accelerate calculate
+    uint8_t K_G; //scale factor for Gyroscope ,ADSI16467-2 default 40.
+    float KG_Reciprocal; //the reciprocal of scale factor,to accelerate calculate.
 
     uint16_t status;
-    uint16_t rangeModel; //Measurement range (model specific) identifier.
-    uint16_t prodId; //Identification, device number,default 0x4053.
+    uint16_t RangeModel; //Measurement range (model specific) identifier.
+    uint16_t ProdId; //Identification, device number,default 0x4053.
 
-    uint16_t firm_rev; //Identification, firmware revision
-    uint16_t firm_month; //Factory configuration month
-    uint16_t firm_day; //Factory configuration day
-    uint16_t firm_year; //Identification, date code, year
-    uint16_t serial_num; //Factory configuration year
+    uint16_t FirmRev; //Identification, firmware revision.
+    uint16_t Firm_Month; //Factory configuration month.
+    uint16_t Firm_Day; //Factory configuration day.
+    uint16_t Firm_Year; //Identification, date code, year.
+    uint16_t Serial_Num; //Lot specific serial number.
 
     Accel_T ADIS_Accel;
 
     Gyro_T ADIS_Gyro;
+
+    DeltaAngle_T ADIS_DeltaAng;
+
+    DeltaVelocity_T ADIS_DeltaVel;
 
     float Temperature;
 } ADIS16467_T;

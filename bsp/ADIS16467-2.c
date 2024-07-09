@@ -10,14 +10,14 @@ void ADIS16467_Init(ADIS16467_T *imu) {
     ADI_Write_Reg(imu, GLOB_CMD_REG, 0x80); //software reset
     ADI_Write_Reg(imu, GLOB_CMD_REG + 1, 0x80);
     imu->K_G = 40;
-    imu->KG_reciprocal = (float) (1 / imu->K_G);
+    imu->KG_Reciprocal = (float) (1 / imu->K_G);
     HAL_Delay(400); // wait for reboot
 }
 
 int ADIS16467_Check(ADIS16467_T *imu) {
     uint16_t imu_number;
     ADI_Read_Reg(imu, PROD_ID_REG, &imu_number, 1); //read imu ID
-    imu->prodId = imu_number;
+    imu->ProdId = imu_number;
     if (imu_number == 0x4053)
         return 1;
     else
@@ -27,20 +27,20 @@ int ADIS16467_Check(ADIS16467_T *imu) {
 void ADIS16467_imuInfo(ADIS16467_T *imu) {
     uint16_t data[5];
     ADI_Read_Reg(imu, RANG_MDL_REG, data, 1); //read range model
-    imu->rangeModel = data[0];
+    imu->RangeModel = data[0];
 
     ADI_Read_Reg(imu, FIRM_REV_REG, &data[1], 1); //read firmware revision
-    imu->firm_rev = data[1];
+    imu->FirmRev = data[1];
 
     ADI_Read_Reg(imu, FIRM_DM_REG, &data[2], 1); //read firmware revision
-    imu->firm_month = data[2] >> 8;
-    imu->firm_day = data[2] & 0x00FF;
+    imu->Firm_Month = data[2] >> 8;
+    imu->Firm_Day = data[2] & 0x00FF;
 
     ADI_Read_Reg(imu, FIRM_Y_REG, &data[3], 1); //read firmware revision
-    imu->firm_year = data[3];
+    imu->Firm_Year = data[3];
 
     ADI_Read_Reg(imu, SERIAL_NUM_REG, &data[4], 1); //read firmware revision
-    imu->serial_num = data[4];
+    imu->Serial_Num = data[4];
 }
 
 void ADIS16467_Read_Accel(ADIS16467_T *imu) {
@@ -48,37 +48,37 @@ void ADIS16467_Read_Accel(ADIS16467_T *imu) {
 
     ADI_Read_Reg(imu, X_ACCL_LOW_REG, AccelData, 2);
     imu->ADIS_Accel.Accel_X_RAW = (int32_t) ((AccelData[1] << 16) & 0xFFFF0000 | AccelData[0]);
-    imu->ADIS_Accel.HP_Accel_X = (float) (imu->ADIS_Accel.Accel_X_RAW * (imu->KG_reciprocal / (1 << 16)));
+//    imu->ADIS_Accel.HP_Accel_X = (float) (imu->ADIS_Accel.Accel_X_RAW );
 
     ADI_Read_Reg(imu, Y_ACCL_LOW_REG, &AccelData[2], 2);
     imu->ADIS_Accel.Accel_Y_RAW = (int32_t) ((AccelData[3] << 16) & 0xFFFF0000 | AccelData[2]);
-    imu->ADIS_Accel.HP_Accel_Y = (float) (imu->ADIS_Accel.Accel_Y_RAW * (imu->KG_reciprocal / (1 << 16)));
+//    imu->ADIS_Accel.HP_Accel_Y = (float) (imu->ADIS_Accel.Accel_Y_RAW * (imu->KG_reciprocal / (1 << 16)));
 
     ADI_Read_Reg(imu, Z_ACCL_LOW_REG, &AccelData[4], 2);
     imu->ADIS_Accel.Accel_Z_RAW = (int32_t) ((AccelData[5] << 16) & 0xFFFF0000 | AccelData[4]);
-    imu->ADIS_Accel.HP_Accel_Z = (float) (imu->ADIS_Accel.Accel_Z_RAW * (imu->KG_reciprocal / (1 << 16)));
+//    imu->ADIS_Accel.HP_Accel_Z = (float) (imu->ADIS_Accel.Accel_Z_RAW * (imu->KG_reciprocal / (1 << 16)));
 }
 
 void ADIS16467_Read_Gyro(ADIS16467_T *imu) {
     uint16_t GyroData[6] = {0};
 
     ADI_Read_Reg(imu, X_GYRO_LOW_REG, GyroData, 2);
-    imu->Gx = (int32_t) ((GyroData[1] << 16) & 0xFFFF0000 | GyroData[0]) / 655360.0f;
-    imu->Gyro_X_RAW = (int32_t) ((data[1] << 16) & 0xFFFF0000 | data[0]);
+    imu->ADIS_Gyro.Gyro_X_RAW = (int32_t) ((GyroData[1] << 16) & 0xFFFF0000 | GyroData[0]);
+    imu->ADIS_Gyro.HP_Gyro_X = (float) (imu->ADIS_Gyro.Gyro_X_RAW * (imu->KG_Reciprocal / (1 << 16)));
 
-    ADI_Read_Reg(imu, Y_GYRO_LOW_REG, data, 2);
-    imu->Gy = (int32_t) ((data[1] << 16) & 0xFFFF0000 | data[0]) / 655360.0f;
-    imu->Gyro_Y_RAW = (int32_t) ((data[1] << 16) & 0xFFFF0000 | data[0]);
+    ADI_Read_Reg(imu, Y_GYRO_LOW_REG, &GyroData[2], 2);
+    imu->ADIS_Gyro.Gyro_Y_RAW = (int32_t) ((GyroData[3] << 16) & 0xFFFF0000 | GyroData[2]);
+    imu->ADIS_Gyro.HP_Gyro_Y = (float) (imu->ADIS_Gyro.Gyro_Y_RAW * (imu->KG_Reciprocal / (1 << 16)));
 
-    ADI_Read_Reg(imu, Z_GYRO_LOW_REG, data, 2);
-    imu->Gz = (int32_t) ((data[1] << 16) & 0xFFFF0000 | data[0]) / 655360.0f;
-    imu->Gyro_Z_RAW = (int32_t) ((data[1] << 16) & 0xFFFF0000 | data[0]);
+    ADI_Read_Reg(imu, Z_GYRO_LOW_REG, &GyroData[4], 2);
+    imu->ADIS_Gyro.Gyro_Z_RAW = (int32_t) ((GyroData[5] << 16) & 0xFFFF0000 | GyroData[4]);
+    imu->ADIS_Gyro.HP_Gyro_Z = (float) (imu->ADIS_Gyro.Gyro_Z_RAW * (imu->KG_Reciprocal / (1 << 16)));
 }
 
 void ADIS16467_Read_Temp(ADIS16467_T *imu) {
-    uint16_t data[1];
-    ADI_Read_Reg(imu, TEMP_OUT_REG, data, 1);
-    imu->Temperature = (int16_t) data[0] * 0.1;
+    uint16_t TempData;
+    ADI_Read_Reg(imu, TEMP_OUT_REG, &TempData, 1);
+    imu->Temperature = (int16_t) TempData * 0.1;
 }
 
 int8_t ADIS16467_Burst_Read(ADIS16467_T *imu) {
