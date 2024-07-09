@@ -32,7 +32,7 @@ void ADIS16467_imuInfo(ADIS16467_T *imu) {
     ADI_Read_Reg(imu, FIRM_REV_REG, &data[1], 1); //read firmware revision
     imu->FirmRev = data[1];
 
-    ADI_Read_Reg(imu, FIRM_DM_REG, &data[2], 1); //read firmware revision
+    ADI_Read_Reg(imu, FIRM_DM_REG, &data[2], 1); //read fir
     imu->Firm_Month = data[2] >> 8;
     imu->Firm_Day = data[2] & 0x00FF;
 
@@ -48,15 +48,15 @@ void ADIS16467_Read_Accel(ADIS16467_T *imu) {
 
     ADI_Read_Reg(imu, X_ACCL_LOW_REG, AccelData, 2);
     imu->ADIS_Accel.Accel_X_RAW = (int32_t) ((AccelData[1] << 16) & 0xFFFF0000 | AccelData[0]);
-//    imu->ADIS_Accel.HP_Accel_X = (float) (imu->ADIS_Accel.Accel_X_RAW );
+    imu->ADIS_Accel.HP_Accel_X = (float) (imu->ADIS_Accel.Accel_X_RAW * 0.01 * 1.25 * Gravity / (1 << 16));
 
     ADI_Read_Reg(imu, Y_ACCL_LOW_REG, &AccelData[2], 2);
     imu->ADIS_Accel.Accel_Y_RAW = (int32_t) ((AccelData[3] << 16) & 0xFFFF0000 | AccelData[2]);
-//    imu->ADIS_Accel.HP_Accel_Y = (float) (imu->ADIS_Accel.Accel_Y_RAW * (imu->KG_reciprocal / (1 << 16)));
+    imu->ADIS_Accel.HP_Accel_Y = (float) (imu->ADIS_Accel.Accel_Y_RAW * 0.01 * 1.25 * Gravity / (1 << 16));
 
     ADI_Read_Reg(imu, Z_ACCL_LOW_REG, &AccelData[4], 2);
     imu->ADIS_Accel.Accel_Z_RAW = (int32_t) ((AccelData[5] << 16) & 0xFFFF0000 | AccelData[4]);
-//    imu->ADIS_Accel.HP_Accel_Z = (float) (imu->ADIS_Accel.Accel_Z_RAW * (imu->KG_reciprocal / (1 << 16)));
+    imu->ADIS_Accel.HP_Accel_Z = (float) (imu->ADIS_Accel.Accel_Z_RAW * 1.25 * 0.01 * Gravity / (1 << 16));
 }
 
 void ADIS16467_Read_Gyro(ADIS16467_T *imu) {
@@ -73,6 +73,38 @@ void ADIS16467_Read_Gyro(ADIS16467_T *imu) {
     ADI_Read_Reg(imu, Z_GYRO_LOW_REG, &GyroData[4], 2);
     imu->ADIS_Gyro.Gyro_Z_RAW = (int32_t) ((GyroData[5] << 16) & 0xFFFF0000 | GyroData[4]);
     imu->ADIS_Gyro.HP_Gyro_Z = (float) (imu->ADIS_Gyro.Gyro_Z_RAW * (imu->KG_Reciprocal / (1 << 16)));
+}
+
+void ADIS16467_Read_DeltaAngle(ADIS16467_T *imu) {
+    uint16_t DeltaAngleData[6] = {0};
+
+    ADI_Read_Reg(imu, X_DELTANG_LOW_REG, DeltaAngleData, 2);
+    imu->ADIS_DeltaAng.DeltaAngle_X_RAW = (int32_t) ((DeltaAngleData[1] << 16) & 0xFFFF0000 | DeltaAngleData[0]);
+    imu->ADIS_Gyro.HP_Gyro_X = (float) (imu->ADIS_DeltaAng.DeltaAngle_X_RAW * ThetaMax / (1 << 15));
+
+    ADI_Read_Reg(imu, Y_DELTANG_LOW_REG, &DeltaAngleData[2], 2);
+    imu->ADIS_DeltaAng.DeltaAngle_Y_RAW = (int32_t) ((DeltaAngleData[3] << 16) & 0xFFFF0000 | DeltaAngleData[2]);
+    imu->ADIS_DeltaAng.DeltaAngle_Y = (float) (imu->ADIS_DeltaAng.DeltaAngle_Y_RAW * ThetaMax / (1 << 15));
+
+    ADI_Read_Reg(imu, Z_GYRO_LOW_REG, &DeltaAngleData[4], 2);
+    imu->ADIS_DeltaAng.DeltaAngle_Z_RAW = (int32_t) ((DeltaAngleData[5] << 16) & 0xFFFF0000 | DeltaAngleData[4]);
+    imu->ADIS_DeltaAng.DeltaAngle_Z = (float) (imu->ADIS_DeltaAng.DeltaAngle_Z_RAW * ThetaMax / (1 << 15));
+}
+
+void ADIS16467_Read_DeltaVel(ADIS16467_T *imu) {
+    uint16_t DeltaVelData[6] = {0};
+
+    ADI_Read_Reg(imu, X_DELTANG_LOW_REG, DeltaVelData, 2);
+    imu->ADIS_DeltaVel.DeltaVelocity_X_RAW = (int32_t) ((DeltaVelData[1] << 16) & 0xFFFF0000 | DeltaVelData[0]);
+    imu->ADIS_DeltaVel.HP_DeltaVelocity_X = (float) (imu->ADIS_DeltaVel.DeltaVelocity_X_RAW * DeltaVelCof);
+
+    ADI_Read_Reg(imu, Y_DELTANG_LOW_REG, &DeltaVelData[2], 2);
+    imu->ADIS_DeltaVel.DeltaVelocity_Y_RAW = (int32_t) ((DeltaVelData[3] << 16) & 0xFFFF0000 | DeltaVelData[2]);
+    imu->ADIS_DeltaVel.HP_DeltaVelocity_Y = (float) (imu->ADIS_DeltaVel.DeltaVelocity_Y_RAW * DeltaVelCof);
+
+    ADI_Read_Reg(imu, Z_GYRO_LOW_REG, &DeltaVelData[4], 2);
+    imu->ADIS_DeltaVel.DeltaVelocity_Z_RAW = (int32_t) ((DeltaVelData[5] << 16) & 0xFFFF0000 | DeltaVelData[4]);
+    imu->ADIS_DeltaVel.HP_DeltaVelocity_Z = (float) (imu->ADIS_DeltaVel.DeltaVelocity_Z_RAW * DeltaVelCof);
 }
 
 void ADIS16467_Read_Temp(ADIS16467_T *imu) {

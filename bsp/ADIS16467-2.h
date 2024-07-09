@@ -74,6 +74,9 @@
 #define FLSHCNT_LOW_REG 0x7C
 #define FLSHCNT_HIGH_REG 0x7E
 
+#define Gravity 9.80665
+#define ThetaMax 720
+#define DeltaVelCof 0.01221
 typedef struct {
     /* RAW register data */
     int32_t Gyro_X_RAW;
@@ -105,11 +108,11 @@ typedef struct {
 typedef struct {
     /* RAW register data */
     int32_t DeltaAngle_X_RAW;
-    int32_t DeltaAngleAccel_Y_RAW;
+    int32_t DeltaAngle_Y_RAW;
     int32_t DeltaAngle_Z_RAW;
     /* 16 bit data */
     float DeltaAngle_X;
-    float DeltaAngle_y;
+    float DeltaAngle_Y;
     float DeltaAngle_Z;
     /*32 bit data, additional */
     float HP_DeltaAngle_X;
@@ -119,7 +122,7 @@ typedef struct {
 typedef struct {
     /* RAW register data */
     int32_t DeltaVelocity_X_RAW;
-    int32_t DeltaAngleAccel_Y_RAW;
+    int32_t DeltaVelocity_Y_RAW;
     int32_t DeltaVelocity_Z_RAW;
     /* 16 bit data */
     float DeltaVelocity_X;
@@ -137,15 +140,18 @@ typedef struct {
 
     uint8_t K_G; //scale factor for Gyroscope ,ADSI16467-2 default 40.
     float KG_Reciprocal; //the reciprocal of scale factor,to accelerate calculate.
+    float g; //liner
+
+
 
     uint16_t status;
     uint16_t RangeModel; //Measurement range (model specific) identifier.
     uint16_t ProdId; //Identification, device number,default 0x4053.
 
     uint16_t FirmRev; //Identification, firmware revision.
-    uint16_t Firm_Month; //Factory configuration month.
-    uint16_t Firm_Day; //Factory configuration day.
-    uint16_t Firm_Year; //Identification, date code, year.
+    uint16_t Firm_Month; //Factory configuration month，HEX.
+    uint16_t Firm_Day; //Factory configuration day,HEX.
+    uint16_t Firm_Year; //Identification, date code, year, HEX.
     uint16_t Serial_Num; //Lot specific serial number.
 
     Accel_T ADIS_Accel;
