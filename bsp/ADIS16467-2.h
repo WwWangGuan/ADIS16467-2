@@ -98,7 +98,7 @@ typedef struct {
     int32_t Accel_Z_RAW;
     /* 16 bit data */
     float Accel_X;
-    float Accel_y;
+    float Accel_Y;
     float Accel_Z;
     /*32 bit data, additional */
     float HP_Accel_X;
@@ -118,7 +118,7 @@ typedef struct {
     float HP_DeltaAngle_X;
     float HP_DeltaAngle_Y;
     float HP_DeltaAngle_Z;
-}DeltaAngle_T;
+} DeltaAngle_T;
 typedef struct {
     /* RAW register data */
     int32_t DeltaVelocity_X_RAW;
@@ -132,7 +132,7 @@ typedef struct {
     float HP_DeltaVelocity_X;
     float HP_DeltaVelocity_Y;
     float HP_DeltaVelocity_Z;
-}DeltaVelocity_T;
+} DeltaVelocity_T;
 typedef struct {
     SPI_HandleTypeDef *hspi; //SPI handle
     GPIO_TypeDef *GPIOx;     //CS pin GPIOx
@@ -149,8 +149,8 @@ typedef struct {
     uint16_t ProdId; //Identification, device number,default 0x4053.
 
     uint16_t FirmRev; //Identification, firmware revision.
-    uint16_t Firm_Month; //Factory configuration month，HEX.
-    uint16_t Firm_Day; //Factory configuration day,HEX.
+    uint16_t Firm_Month; //Factory configuration month,HEX.
+    uint16_t Firm_Day; //Factory configuration day, HEX.
     uint16_t Firm_Year; //Identification, date code, year, HEX.
     uint16_t Serial_Num; //Lot specific serial number.
 
@@ -169,13 +169,17 @@ void ADIS16467_Init(ADIS16467_T *device);
 
 int ADIS16467_Check(ADIS16467_T *device);
 
-void ADIS16467_DeviceInfo(ADIS16467_T *device);
+void ADIS16467_imuInfo(ADIS16467_T *device);
 
 void ADIS16467_Read_Accel(ADIS16467_T *device);
 
 void ADIS16467_Read_Gyro(ADIS16467_T *device);
 
 void ADIS16467_Read_Temp(ADIS16467_T *device);
+
+void ADIS16467_Read_DeltaAngle(ADIS16467_T *imu);
+
+void ADIS16467_Read_DeltaVel(ADIS16467_T *imu);
 
 int8_t ADI_Read_Reg(ADIS16467_T *device, uint8_t addr, uint16_t *receive, uint8_t num);
 
